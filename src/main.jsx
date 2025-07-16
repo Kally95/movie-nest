@@ -14,7 +14,6 @@ import WatchlistProvider from "./context/WatchlistContext";
 import WatchedListProvider from "./context/WatchedContext";
 import UserSettings from "./components/UserSettings";
 import SignUp from "./components/SignUp";
-import { Provider } from "@/components/ui/provider";
 
 const router = createBrowserRouter([
   {
@@ -38,14 +37,12 @@ const router = createBrowserRouter([
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <Provider>
-      <AuthProvider>
-        <WatchlistProvider>
-          <WatchedListProvider>
-            <RouterProvider router={router} />
-          </WatchedListProvider>
-        </WatchlistProvider>
-      </AuthProvider>
-    </Provider>
+    <AuthProvider>
+      <WatchlistProvider>
+        <WatchedListProvider>
+          <RouterProvider router={router} />
+        </WatchedListProvider>
+      </WatchlistProvider>
+    </AuthProvider>
   </React.StrictMode>
 );
