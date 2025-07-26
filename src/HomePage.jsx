@@ -9,40 +9,34 @@ import WatchedMovieSection from "./components/WatchedMovieSection";
 import WatchListSection from "./components/WatchListSection";
 import { useWatchlistContext } from "./context/WatchlistContext";
 import { useWatchedListContext } from "./context/WatchedContext";
+import SearchWithDropdown from "./components/SearchWithDropdown"; // 1. Import the new component
 
 function HomePage() {
-  const { movies, movieName, loading } = useOutletContext();
-  const hasSearch = movieName.trim() !== "";
-  const hasResults = movies && movies.length > 0;
+  const { movies, movieName, loading, handleSearch } = useOutletContext();
   const { watchlist } = useWatchlistContext();
   const { watchedList } = useWatchedListContext();
   const { isLoggedIn } = useAuth();
+
   return (
     <>
-      {hasSearch && hasResults ? (
-        <ErrorBoundary FallbackComponent={ErrorFallback}>
-          <SearchResults
-            movies={movies}
-            searchQuery={movieName}
-            loading={loading}
-          />
-        </ErrorBoundary>
-      ) : (
+      <SearchWithDropdown
+        movieName={movieName}
+        handleSearch={handleSearch}
+        movies={movies}
+        loading={loading}
+      />
+      <Hero />
+      <ErrorBoundary FallbackComponent={ErrorFallback}>
+        <PopularMoviesSection />
+      </ErrorBoundary>
+      {isLoggedIn && (
         <>
-          <Hero />
           <ErrorBoundary FallbackComponent={ErrorFallback}>
-            <PopularMoviesSection />
+            <WatchedMovieSection watchedList={watchedList} />
           </ErrorBoundary>
-          {isLoggedIn && (
-            <>
-              <ErrorBoundary FallbackComponent={ErrorFallback}>
-                <WatchedMovieSection watchedList={watchedList} />
-              </ErrorBoundary>
-              <ErrorBoundary FallbackComponent={ErrorFallback}>
-                <WatchListSection watchlist={watchlist} />
-              </ErrorBoundary>
-            </>
-          )}
+          <ErrorBoundary FallbackComponent={ErrorFallback}>
+            <WatchListSection watchlist={watchlist} />
+          </ErrorBoundary>
         </>
       )}
     </>

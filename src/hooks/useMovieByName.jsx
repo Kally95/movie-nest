@@ -10,20 +10,23 @@ const options = {
   },
 };
 
-export default function useMovieByName(query) {
+export default function useMovieByName(query, page = 1) {
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [totalPages, setTotalPages] = useState(0);
 
   useEffect(() => {
     if (!query.trim()) {
       setMovies([]);
+      setTotalPages(0);
       return;
     }
 
     setLoading(true);
+
     fetch(
-      `${TMDB_API}/search/movie?query=${query}&include_adult=false&language=en-US&page=1`,
+      `${TMDB_API}/search/movie?query=${query}&include_adult=false&language=en-US&page=${page}`,
       options
     )
       .then((res) => {
@@ -32,13 +35,14 @@ export default function useMovieByName(query) {
       })
       .then((data) => {
         setMovies(data.results || []);
+        setTotalPages(data.total_pages || 0);
         setLoading(false);
       })
       .catch((err) => {
         setError(err);
         setLoading(false);
       });
-  }, [query]);
+  }, [query, page]);
 
-  return [movies, loading, error];
+  return { movies, loading, error, totalPages };
 }

@@ -14,6 +14,7 @@ import WatchlistProvider from "./context/WatchlistContext";
 import WatchedListProvider from "./context/WatchedContext";
 import UserSettings from "./components/UserSettings";
 import SignUp from "./components/SignUp";
+import SearchResultsPage from "./components/SearchResultsPage";
 
 const router = createBrowserRouter([
   {
@@ -31,6 +32,7 @@ const router = createBrowserRouter([
         element: <MovieDetail />,
       },
       { path: "settings", element: <UserSettings /> },
+      { path: "search-results", element: <SearchResultsPage /> },
     ],
   },
 ]);

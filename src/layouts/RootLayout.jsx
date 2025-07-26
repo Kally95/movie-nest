@@ -1,19 +1,15 @@
-import { Flex, Container } from "@chakra-ui/react";
-import { Outlet } from "react-router-dom";
-import Navbar from "../components/Navbar";
-import { ChakraProvider } from "@chakra-ui/react";
+import { Flex, Container, ChakraProvider } from "@chakra-ui/react";
+import { Outlet, useNavigate } from "react-router-dom";
 import { useState } from "react";
+import Navbar from "../components/Navbar";
 import useMovieByName from "../hooks/useMovieByName";
-import { useNavigate } from "react-router-dom";
 
 export default function RootLayout() {
   const [movieName, setMovieName] = useState("");
-  const [movies, loading, error] = useMovieByName(movieName);
   const navigate = useNavigate();
-
+  const { movies, loading, error } = useMovieByName(movieName);
   const handleSearch = (e) => {
     setMovieName(e.target.value);
-    navigate("/");
   };
 
   return (
@@ -29,9 +25,11 @@ export default function RootLayout() {
         color="white"
         flexDirection="column"
       >
-        <Navbar handleSearch={handleSearch} movieName={movieName} />
+        <Navbar />
         <Container maxW="container.xl" pt={4}>
-          <Outlet context={{ movies, loading, error, movieName }} />
+          <Outlet
+            context={{ movies, loading, error, movieName, handleSearch }}
+          />
         </Container>
       </Flex>
     </ChakraProvider>

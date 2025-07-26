@@ -3,13 +3,14 @@ import {
   Input,
   InputGroup,
   InputRightElement,
+  Image,
   Text,
   VStack,
+  Flex,
   Spinner,
 } from "@chakra-ui/react";
 import { SearchIcon } from "@chakra-ui/icons";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
-import MovieSectionItem from "../components/MovieSectionItem";
 
 export default function SearchWithDropdown({
   movieName,
@@ -51,21 +52,33 @@ export default function SearchWithDropdown({
           top="100%"
           left="0"
           right="0"
-          bg="gray.800"
+          bg="gray.700"
           mt={2}
           borderRadius="md"
           shadow="lg"
           zIndex="dropdown"
           overflow="hidden"
         >
-          <VStack spacing={2} align="stretch" p={2}>
+          <VStack spacing={0} align="stretch">
             {movies.slice(0, 5).map((movie) => (
-              <MovieSectionItem
-                key={movie.id}
-                id={movie.id}
-                title={movie.title}
-                movieImage={movie.backdrop_path}
-              />
+              <RouterLink to={`/movie/${movie.id}`} key={movie.id}>
+                <Flex
+                  align="center"
+                  p={3}
+                  _hover={{ bg: "gray.600" }}
+                  cursor="pointer"
+                >
+                  <Image
+                    src={`https://image.tmdb.org/t/p/w200${movie.poster_path}`}
+                    alt={movie.title}
+                    boxSize="50px"
+                    objectFit="cover"
+                    borderRadius="md"
+                    mr={4}
+                  />
+                  <Text fontWeight="medium">{movie.title}</Text>
+                </Flex>
+              </RouterLink>
             ))}
 
             {movies.length > 5 && (
@@ -77,11 +90,10 @@ export default function SearchWithDropdown({
                   textAlign="center"
                   fontWeight="bold"
                   color="red.400"
-                  _hover={{ bg: "gray.700" }}
+                  _hover={{ bg: "gray.600" }}
                   cursor="pointer"
-                  borderRadius="md"
                 >
-                  <Text>See all {movies.length} results</Text>
+                  See all {movies.length} results
                 </Box>
               </RouterLink>
             )}

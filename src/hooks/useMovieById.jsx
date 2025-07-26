@@ -11,30 +11,41 @@ const options = {
 const TMDB_API = "https://api.themoviedb.org/3";
 
 export default function useMovieById(id = "") {
-  const [movieById, setMovieById] = useState([]);
+  const [movie, setMovie] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState();
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (id === "") return;
+    if (!id) {
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
     const fetchMovieById = () => {
-      setLoading(true);
       fetch(`${TMDB_API}/movie/${id}?language=en-US`, options)
         .then((res) => {
           if (!res.ok) throw new Error("Network response was not ok");
           return res.json();
         })
-        .then((res) => {
-          setMovieById(res);
-          setLoading(false);
+        .then((data) => {
+          if (data.success === false) {
+            throw new Error(data.status_message || "Could not find the movie.");
+          }
+          setMovie(data);
         })
         .catch((err) => {
           setError(err);
+        })
+        .finally(() => {
           setLoading(false);
         });
     };
+
     fetchMovieById();
   }, [id]);
 
-  return [movieById, error, loading];
+  return { movie, error, loading };
 }

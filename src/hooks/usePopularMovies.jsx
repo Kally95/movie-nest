@@ -10,33 +10,33 @@ const options = {
 };
 const TMDB_API = "https://api.themoviedb.org/3";
 
-export default function usePopularMovies({ limit = 5 } = {}) {
+export default function usePopularMovies({ page = 1 } = {}) {
   const [popularMovies, setPopularMovies] = useState([]);
+  const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState();
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchPopularMovies = () => {
-      setLoading(true);
-      fetch(
-        `${TMDB_API}/discover/movie?include_adult=false&language=en-US&page=1&sort_by=popularity.desc`,
-        options
-      )
-        .then((res) => {
-          if (!res.ok) throw new Error("Network response was not ok");
-          return res.json();
-        })
-        .then((res) => {
-          setPopularMovies(res.results);
-          setLoading(false);
-        })
-        .catch((err) => {
-          setError(err);
-          setLoading(false);
-        });
-    };
-    fetchPopularMovies();
-  }, [limit]);
+    setLoading(true);
+    setError(null);
+    fetch(
+      `${TMDB_API}/discover/movie?include_adult=false&language=en-US&page=${page}&sort_by=popularity.desc`,
+      options
+    )
+      .then((res) => {
+        if (!res.ok) throw new Error("Network response was not ok");
+        return res.json();
+      })
+      .then((data) => {
+        if (data.success === false) {
+          throw new Error(data.status_message || "API request failed");
+        }
+        setPopularMovies(data.results || []);
+        setTotalPages(data.total_pages || 0);
+      })
+      .catch((err) => setError(err))
+      .finally(() => setLoading(false));
+  }, [page]);
 
-  return [popularMovies, error, loading];
+  return { popularMovies, totalPages, error, loading };
 }

@@ -11,30 +11,41 @@ const options = {
 const TMDB_API = "https://api.themoviedb.org/3";
 
 export default function useGetTrailerById(id = "") {
-  const [trailer, setTrailer] = useState([]);
+  const [trailer, setTrailer] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState();
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (id === "") return;
-    const fetchMovieById = () => {
-      setLoading(true);
+    if (!id) {
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    const fetchTrailerById = () => {
       fetch(`${TMDB_API}/movie/${id}/videos?language=en-US`, options)
         .then((res) => {
           if (!res.ok) throw new Error("Network response was not ok");
           return res.json();
         })
-        .then((res) => {
-          setTrailer(res);
-          setLoading(false);
+        .then((data) => {
+          if (data.success === false) {
+            throw new Error(data.status_message || "Could not fetch trailer.");
+          }
+          setTrailer(data);
         })
         .catch((err) => {
           setError(err);
+        })
+        .finally(() => {
           setLoading(false);
         });
     };
-    fetchMovieById();
+
+    fetchTrailerById();
   }, [id]);
 
-  return [trailer, error, loading];
+  return { trailer, error, loading };
 }

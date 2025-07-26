@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import {
   Flex,
   AspectRatio,
@@ -8,12 +8,13 @@ import {
   Box,
   Badge,
   Icon,
+  Button,
 } from "@chakra-ui/react";
-import usePopularMovies from "../hooks/useMovieById";
+import useMovieById from "../hooks/useMovieById";
 import LoadingSpinner from "./ui/LoadingSpinner";
-import { HiHeart } from "react-icons/hi";
-import useGetCastById from "../hooks/useGetCastById";
+import { HiHeart, HiArrowLeft } from "react-icons/hi";
 import CastItemSection from "./CastItemSection";
+import useGetCastById from "../hooks/useGetCastById";
 import useGetTrailerById from "../hooks/useGetTrailerById";
 import { useWatchlistContext } from "../context/WatchlistContext";
 import { IoEye, IoEyeOff } from "react-icons/io5";
@@ -22,13 +23,28 @@ import { useAuth } from "../context/AuthContext";
 
 export default function MovieDetail() {
   const { id } = useParams();
-  const [movie, error, loading] = usePopularMovies(id);
-  const [creditsData] = useGetCastById(id);
-  const [trailer] = useGetTrailerById(id);
+  const navigate = useNavigate();
+
+  // 1. Correctly destructure the objects from all hooks
+  const { movie, error: movieError, loading: movieLoading } = useMovieById(id);
+  const { creditsData, loading: castLoading } = useGetCastById(id);
+  const { trailer, loading: trailerLoading } = useGetTrailerById(id);
+
   const { toggleWatchlist, watchlist } = useWatchlistContext();
   const { toggleWatchedList, watchedList } = useWatchedListContext();
   const { isLoggedIn } = useAuth();
-  const trailerInfo = trailer.results?.find(
+
+  // 2. Check for loading state from all hooks
+  if (movieLoading || castLoading || trailerLoading) {
+    return <LoadingSpinner />;
+  }
+
+  if (movieError || !movie) {
+    return <Text>Movie not found.</Text>;
+  }
+
+  // 3. Safely access nested properties
+  const trailerInfo = trailer?.results?.find(
     (t) => t.type === "Trailer" && t.site === "YouTube"
   );
 
@@ -37,21 +53,21 @@ export default function MovieDetail() {
   const isInWatchlist = watchlist.some((m) => m.id === movie.id);
   const isWatched = watchedList.some((m) => m.id === movie.id);
 
-  if (!id) {
-    return <Text>No movie ID provided</Text>;
-  }
-
-  if (loading) {
-    return <LoadingSpinner />;
-  }
-
-  if (!movie) {
-    return <Text>No movie found</Text>;
-  }
-
   return (
-    <>
-      <Flex mt="5rem" width="100%" mb="3rem">
+    <Box mt="5rem">
+      <Button
+        leftIcon={<HiArrowLeft />}
+        onClick={() => navigate(-1)}
+        mb={6}
+        variant="outline"
+        bg="#e53e3e"
+        color="white"
+        borderColor="none"
+      >
+        Back
+      </Button>
+
+      <Flex width="100%" mb="3rem">
         <Box position="relative">
           <Image
             src={`https://image.tmdb.org/t/p/w500${movie.backdrop_path}`}
@@ -60,7 +76,6 @@ export default function MovieDetail() {
             maxW="500px"
             alt={movie.title}
           />
-
           {isLoggedIn && (
             <Box
               position="absolute"
@@ -70,39 +85,20 @@ export default function MovieDetail() {
               flexDirection="column"
               gap={3}
             >
-              {isInWatchlist ? (
-                <Icon
-                  as={HiHeart}
-                  boxSize={8}
-                  cursor="pointer"
-                  color="#E53E3E"
-                  onClick={() => toggleWatchlist(movie)}
-                />
-              ) : (
-                <Icon
-                  as={HiHeart}
-                  boxSize={8}
-                  cursor="pointer"
-                  onClick={() => toggleWatchlist(movie)}
-                />
-              )}
-
-              {isWatched ? (
-                <Icon
-                  as={IoEye}
-                  boxSize={8}
-                  color="#E53E3E"
-                  cursor="pointer"
-                  onClick={() => toggleWatchedList(movie)}
-                />
-              ) : (
-                <Icon
-                  as={IoEyeOff}
-                  boxSize={8}
-                  cursor="pointer"
-                  onClick={() => toggleWatchedList(movie)}
-                />
-              )}
+              <Icon
+                as={HiHeart}
+                boxSize={8}
+                cursor="pointer"
+                color={isInWatchlist ? "#E53E3E" : "white"}
+                onClick={() => toggleWatchlist(movie)}
+              />
+              <Icon
+                as={isWatched ? IoEye : IoEyeOff}
+                boxSize={8}
+                cursor="pointer"
+                color={isWatched ? "#E53E3E" : "white"}
+                onClick={() => toggleWatchedList(movie)}
+              />
             </Box>
           )}
         </Box>
@@ -125,12 +121,10 @@ export default function MovieDetail() {
               ))}
             </Flex>
           </Box>
-
           <Box>
             <Heading>Overview</Heading>
             <Text>{movie.overview}</Text>
           </Box>
-
           <Box>
             <Text fontSize="m">
               Rating: {Math.floor(movie.vote_average)}/10 rated by{" "}
@@ -140,11 +134,12 @@ export default function MovieDetail() {
         </Flex>
       </Flex>
 
-      {creditsData && creditsData.cast ? (
+      {creditsData?.cast ? (
         <CastItemSection cast={creditsData.cast} />
       ) : (
-        <LoadingSpinner />
+        <Text>Cast information not available.</Text>
       )}
+
       {trailerInfo ? (
         <Flex mt="3rem">
           <AspectRatio w="100%" ratio={16 / 9}>
@@ -156,8 +151,8 @@ export default function MovieDetail() {
           </AspectRatio>
         </Flex>
       ) : (
-        <LoadingSpinner />
+        <Text mt={4}>Trailer not available.</Text>
       )}
-    </>
+    </Box>
   );
 }

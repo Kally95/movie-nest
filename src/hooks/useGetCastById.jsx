@@ -11,30 +11,32 @@ const options = {
 const TMDB_API = "https://api.themoviedb.org/3";
 
 export default function useGetCastById(id = "") {
-  const [cast, setCast] = useState([]);
+  const [creditsData, setCreditsData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState();
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (id === "") return;
-    const fetchCast = () => {
-      setLoading(true);
-      fetch(`${TMDB_API}/movie/${id}/credits?language=en-US`, options)
-        .then((res) => {
-          if (!res.ok) throw new Error("Network response was not ok");
-          return res.json();
-        })
-        .then((res) => {
-          setCast(res);
-          setLoading(false);
-        })
-        .catch((err) => {
-          setError(err);
-          setLoading(false);
-        });
-    };
-    fetchCast();
+    if (!id) {
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    fetch(`${TMDB_API}/movie/${id}/credits?language=en-US`, options)
+      .then((res) => {
+        if (!res.ok) throw new Error("Network response was not ok");
+        return res.json();
+      })
+      .then((data) => {
+        setCreditsData(data);
+      })
+      .catch((err) => {
+        setError(err);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, [id]);
 
-  return [cast, error, loading];
+  return { creditsData, error, loading };
 }

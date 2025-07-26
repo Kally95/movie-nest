@@ -1,84 +1,59 @@
-import {
-  Flex,
-  Box,
-  Input,
-  InputRightElement,
-  InputGroup,
-  Button,
-  Heading,
-} from "@chakra-ui/react";
-import { SearchIcon, Avatar } from "@chakra-ui/icons";
+// Navbar.jsx
+
+import { Flex, Box, Button, Heading, Avatar } from "@chakra-ui/react";
 import { Link as RouterLink } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import DropdownMenu from "./DropdownMenu";
 
-export default function Navbar({ handleSearch, movieName }) {
+export default function Navbar() {
   const { isLoggedIn, logout, user } = useAuth();
   return (
-    <Flex
-      bg="#1E1E1E"
-      justifyContent="space-between"
-      mt="1rem"
-      alignItems="center"
-    >
-      <Box>
-        <Heading>
-          <RouterLink to="/">MovieNest</RouterLink>
-        </Heading>
+    <Flex bg="#1E1E1E" mt="1rem" alignItems="center" width="100%" gap={4}>
+      <Box flex="1">
+        <Flex justifyContent="flex-start">
+          <Heading>
+            <RouterLink to="/">MovieNest</RouterLink>
+          </Heading>
+        </Flex>
       </Box>
-      <Box>
-        <InputGroup size="md" maxW="400px">
-          <Input
-            id="search"
-            type="text"
-            value={movieName}
-            onChange={handleSearch}
-            placeholder="Search movie..."
-            variant="outline"
-            bg="#1E1E1E"
-            _placeholder={{ color: "#ffff;" }}
-          />
-          <InputRightElement>
-            <SearchIcon />
-          </InputRightElement>
-        </InputGroup>
-      </Box>
-      <Box>
-        {isLoggedIn ? (
-          <Flex gap={4} alignItems="center">
-            <Button as={RouterLink} to="/watchlist" colorScheme="red">
-              Watchlist
-            </Button>
-            <Button as={RouterLink} to="/watched-movies" colorScheme="red">
-              Watched
-            </Button>
-            <Button
-              as={RouterLink}
-              to="/"
-              onClick={logout}
-              variant="outline"
-              color="white"
-              borderColor="white"
-              _hover={{ bg: "whiteAlpha.200" }}
-            >
-              Log out
-            </Button>
 
-            <DropdownMenu
-              avatar={
-                <Avatar
-                  size="lg"
-                  name={user.username}
-                  src={user.displayPicture}
-                />
-              }
-            />
-          </Flex>
-        ) : (
-          <Button as={RouterLink} to="/sign-in" colorScheme="red">
-            Sign In
-          </Button>
-        )}
+      <Box flex="1">
+        <Flex gap={4} alignItems="center" justifyContent="flex-end">
+          {isLoggedIn ? (
+            <>
+              <Button as={RouterLink} to="/watchlist" colorScheme="red">
+                Watchlist
+              </Button>
+              <Button as={RouterLink} to="/watched-movies" colorScheme="red">
+                Watched
+              </Button>
+              <Button
+                as={RouterLink}
+                to="/"
+                onClick={logout}
+                variant="outline"
+                color="white"
+                borderColor="white"
+                _hover={{ bg: "whiteAlpha.200" }}
+              >
+                Log out
+              </Button>
+              <DropdownMenu
+                avatar={
+                  <Avatar
+                    size="lg"
+                    name={user.username}
+                    src={user.displayPicture}
+                  />
+                }
+              />
+            </>
+          ) : (
+            <Button as={RouterLink} to="/sign-in" colorScheme="red">
+              Sign In
+            </Button>
+          )}
+        </Flex>
       </Box>
     </Flex>
   );

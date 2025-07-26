@@ -1,13 +1,17 @@
 import { ErrorBoundary } from "react-error-boundary";
 import ErrorFallback from "./ErrorFallback";
-import MovieSection from "./MovieSection";
+import MovieSectionItem from "./MovieSectionItem";
+import Pagination from "./Pagination";
+import usePagination from "../hooks/usePagination";
 import { useWatchlistContext } from "../context/WatchlistContext";
-import { Flex, Heading, Text } from "@chakra-ui/react";
+import { Flex, Heading, Text, Box, SimpleGrid } from "@chakra-ui/react";
 
 export default function Watchlist() {
   const { watchlist } = useWatchlistContext();
+  const { currentPage, totalPages, currentData, handlePageChange } =
+    usePagination(watchlist, 10);
 
-  if (watchlist.length === 0 || !watchlist) {
+  if (watchlist.length === 0) {
     return (
       <Flex
         w="100%"
@@ -18,8 +22,8 @@ export default function Watchlist() {
       >
         <Heading>Your watchlist is empty</Heading>
         <Text>
-          Search for a film and click the heart icon to add it to your watched
-          list.
+          Search for a film and click the heart icon to add it to your
+          watchlist.
         </Text>
       </Flex>
     );
@@ -27,7 +31,25 @@ export default function Watchlist() {
 
   return (
     <ErrorBoundary FallbackComponent={ErrorFallback}>
-      <MovieSection movieSectionLabel={"Watchlist"} movies={watchlist} />
+      <Box w="100%" mt="5rem">
+        <Heading mb={8}>My Watchlist</Heading>
+        <SimpleGrid
+          columns={{ base: 2, sm: 3, md: 4, lg: 5 }}
+          spacing={6}
+          mb={6}
+        >
+          {currentData.map((movie) => (
+            <MovieSectionItem key={movie.id} movie={movie} />
+          ))}
+        </SimpleGrid>
+        <Flex justify="center" mt={4}>
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
+        </Flex>
+      </Box>
     </ErrorBoundary>
   );
 }
